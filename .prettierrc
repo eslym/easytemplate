@@ -1,0 +1,14 @@
+{
+	"endOfLine": "lf",
+	"tabWidth": 4,
+	"useTabs": true,
+	"trailingComma": "none",
+	"overrides": [
+		{
+			"files": "*.{yml,yaml,json,prettierrc}",
+			"options": {
+				"tabWidth": 2
+			}
+		}
+	]
+}
