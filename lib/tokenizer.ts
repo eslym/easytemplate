@@ -1,14 +1,16 @@
 export type TextToken = [type: "t", value: string];
 export type VariableToken = [type: "v", name: string];
 export type WrapperToken = [type: "w", name: string, children: Token[]];
+export type NewLineToken = [type: "n", value: string];
 
-export type Token = TextToken | VariableToken | WrapperToken;
+export type Token = TextToken | VariableToken | WrapperToken | NewLineToken;
 
 export type ParamsDef = Record<string, "v" | "w">;
 
 const var_regex = /^\{\{\s*([a-z][0-9a-z_]*)\s*}}/i;
 const open_regex = /^\{\{\s*#([a-z][0-9a-z_]*)\s*}}/i;
 const close_regex = /^\{\{\s*\/([a-z][0-9a-z_]*)\s*}}/i;
+const newline_regex = /^(?:\r?\n|\r)/;
 
 const types = {
 	v: "variable",
@@ -103,11 +105,16 @@ export function tokenize(src: string): [tokens: Token[], params: ParamsDef] {
 			continue;
 		}
 		const rest = src.slice(cursor);
-		let match = rest.match(var_regex);
+		let match = rest.match(newline_regex);
+		if (match) {
+			tokens.push(["n", match[0]!]);
+			cursor += match[0]!.length;
+			continue;
+		}
+		match = rest.match(var_regex);
 		if (match) {
 			const next = match[1]!;
 			assertParam(next, cursor, params, "v");
-			appendText(tokens, rest.slice(0, match.index));
 			tokens.push(["v", match[1]!]);
 			cursor += match[0]!.length;
 			continue;
