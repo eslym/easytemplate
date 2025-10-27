@@ -25,7 +25,8 @@ export function render<D extends ParamsDef>(
 					return t[1];
 				case "v": {
 					const val = params[t[1] as keyof typeof params];
-					if (val === null || val === undefined) return "";
+					if (val === null || val === undefined)
+						return `{{ ${t[1]} }}`;
 					return String(val);
 				}
 				case "w": {

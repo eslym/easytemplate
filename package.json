@@ -1,7 +1,7 @@
 {
 	"name": "@eslym/easytemplate",
 	"description": "A very simple, featureless template engine",
-	"version": "1.0.1",
+	"version": "1.1.0",
 	"module": "dist/esm/index.js",
 	"type": "module",
 	"files": [
@@ -17,10 +17,16 @@
 			"import": "./dist/esm/vite.js",
 			"require": "./dist/cjs/vite.js",
 			"types": "./dist/types/vite.d.ts"
+		},
+		"./rollup": {
+			"import": "./dist/esm/vite.js",
+			"require": "./dist/cjs/vite.js",
+			"types": "./dist/types/vite.d.ts"
 		}
 	},
 	"devDependencies": {
 		"@types/bun": "latest",
+		"js-xxhash": "^4.0.0",
 		"prettier": "^3.6.2",
 		"vite": "^7.1.9"
 	},
