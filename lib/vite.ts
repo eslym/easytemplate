@@ -4,7 +4,7 @@ import { writeFile } from "fs/promises";
 import { tokenize, type ParamsDef, type Token } from "./tokenizer";
 import { hashName, T } from "./generator";
 
-type DeserializeFunction = (data: string) => any;
+type DeserializeFunction = (data: string, filename: string) => any;
 
 const dfn = T.fn`d`;
 
@@ -56,7 +56,7 @@ async function transformDot(
 	const deserialize =
 		deserializers[extensions.find((ext) => id.endsWith(ext)) || ""] ??
 		defaultDeserialize;
-	let data = deserialize(src);
+	let data = deserialize(src, id);
 	if (data instanceof Promise) {
 		data = await data;
 	}
@@ -188,7 +188,7 @@ async function transformNested(
 	const deserialize =
 		deserializers[extensions.find((ext) => id.endsWith(ext)) || ""] ??
 		defaultDeserialize;
-	let data = deserialize(src);
+	let data = deserialize(src, id);
 	if (data instanceof Promise) {
 		data = await data;
 	}
