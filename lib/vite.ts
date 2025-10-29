@@ -1,6 +1,7 @@
 import type { Plugin } from "rollup";
 import { createFilter } from "vite";
-import { writeFile } from "fs/promises";
+import { dirname } from "path";
+import { writeFile, exists, mkdir } from "fs/promises";
 import { tokenize, type ParamsDef, type Token } from "./tokenizer";
 import { hashName, T } from "./generator";
 
@@ -8,12 +9,74 @@ type DeserializeFunction = (data: string, filename: string) => any;
 
 const dfn = T.fn`d`;
 
+function defaultDtsPath(id: string) {
+	if (/\.[tj]s$/.test(id)) {
+		return id.replace(/\.[tj]s$/, ".d.ts");
+	} else if (id.endsWith(".d.ts")) {
+		return id;
+	}
+	return id + ".d.ts";
+}
+
+function wrapDtsFn(fn: (id: string) => string | boolean | null | undefined) {
+	return (id: string) => {
+		const result = fn(id);
+		if (typeof result === "string") {
+			return result;
+		}
+		if (result === true) {
+			return defaultDtsPath(id);
+		}
+		return false;
+	};
+}
+
+async function writeFileSafe(path: string | false, data: string) {
+	if (path === false) return;
+	const dir = dirname(path);
+	if (!(await exists(dir))) {
+		await mkdir(dir, { recursive: true });
+	}
+	await writeFile(path, data);
+}
+
 export type PluginOptions = {
+	/**
+	 * File extensions to process.
+	 * Can be a string, array of strings, or an object mapping extensions to deserialization functions.
+	 */
 	extensions: string | string[] | Record<string, DeserializeFunction>;
+
+	/**
+	 * Files to include.
+	 */
 	include?: string | RegExp | (string | RegExp)[];
+
+	/**
+	 * Files to exclude.
+	 */
 	exclude?: string | RegExp | (string | RegExp)[];
+
+	/**
+	 * Custom deserialization function for file contents.
+	 * @default JSON.parse
+	 */
 	deserialize?: DeserializeFunction;
-	typescriptDeclarations?: boolean;
+
+	/**
+	 * Generate TypeScript declaration files.
+	 * Can be a boolean or a function that returns the declaration file path.
+	 * @default false
+	 */
+	typescriptDeclarations?:
+		| ((id: string) => string | boolean | null | undefined)
+		| boolean;
+
+	/**
+	 * Mode for generated code structure.
+	 * "dot" for flat structure using dot notation, "nested" for nested object structure.
+	 * @default "dot"
+	 */
 	mode?: "dot" | "nested";
 };
 
@@ -40,12 +103,31 @@ function travelDot(
 	);
 }
 
+async function transformStringOnly(
+	data: string,
+	id: string,
+	dts: (id: string) => string | false
+) {
+	const [tokens, params] = tokenize(data);
+	await writeFileSafe(
+		dts(id),
+		T.str(
+			T.lf([
+				'import type { Token, PARAMS } from "@eslym/easytemplate";',
+				"",
+				`export const entry: Token[] & { [PARAMS]: ${JSON.stringify(params)} } };`
+			])
+		)
+	);
+	return `export const entry = ${JSON.stringify(tokens)};`;
+}
+
 async function transformDot(
 	filter: (id: string) => boolean,
 	extensions: string[],
 	deserializers: Record<string, DeserializeFunction>,
 	defaultDeserialize: DeserializeFunction,
-	dts: boolean,
+	dts: (id: string) => string | false,
 	id: string,
 	src: string
 ) {
@@ -61,19 +143,7 @@ async function transformDot(
 		data = await data;
 	}
 	if (typeof data === "string") {
-		const [tokens, params] = tokenize(data);
-		if (dts) {
-			const file = id + ".d.ts";
-			await writeFile(
-				file,
-				T.lf([
-					'import type { Token, PARAMS } from "@eslym/easytemplate";',
-					"",
-					`export const entry: Token[] & { [PARAMS]: ${JSON.stringify(params)} } };`
-				])
-			);
-		}
-		return `export const entry = ${JSON.stringify(tokens)};`;
+		return transformStringOnly(data, id, dts);
 	}
 	const result: Iterable<string>[] = ["export const entries = {"];
 	const definitions = [
@@ -108,16 +178,15 @@ async function transformDot(
 	});
 	result.push("};");
 	definitions.push("};");
-	if (dts) {
-		const file = id + ".d.ts";
-		await writeFile(file, T.str(T.lf(definitions)));
-	}
+	await writeFileSafe(dts(id), T.str(T.lf(definitions)));
 	return T.str(
 		T.lf(
-			([
-				'const d = (...path) => path.join(".");',
-				...variables.values()
-			] as Iterable<string>[]).concat(result)
+			(
+				[
+					'const d = (...path) => path.join(".");',
+					...variables.values()
+				] as Iterable<string>[]
+			).concat(result)
 		)
 	);
 }
@@ -177,7 +246,7 @@ async function transformNested(
 	extensions: string[],
 	deserializers: Record<string, DeserializeFunction>,
 	defaultDeserialize: DeserializeFunction,
-	dts: boolean,
+	dts: (id: string) => string | false,
 	id: string,
 	src: string
 ) {
@@ -192,21 +261,21 @@ async function transformNested(
 	if (data instanceof Promise) {
 		data = await data;
 	}
+	if (typeof data === "string") {
+		return transformStringOnly(data, id, dts);
+	}
 	const variables = new Map<string, string>();
 	const [code, dtsDef] = travelNested(id, data, [], variables);
-	if (dts) {
-		const file = id + ".d.ts";
-		await writeFile(
-			file,
-			T.str(
-				T.lf([
-					'import type { Token, PARAMS } from "@eslym/easytemplate";',
-					"",
-					T.code`export const entries: ${dtsDef};`
-				])
-			)
-		);
-	}
+	await writeFileSafe(
+		dts(id),
+		T.str(
+			T.lf([
+				'import type { Token, PARAMS } from "@eslym/easytemplate";',
+				"",
+				T.code`export const entries: ${dtsDef};`
+			])
+		)
+	);
 	return T.str(
 		T.lf([...variables.values(), T.code`export const entries = ${code};`])
 	);
@@ -225,7 +294,12 @@ export function easyTemplate(opts = {} as PluginOptions) {
 			? opts.extensions
 			: {};
 
-	const dts = opts.typescriptDeclarations !== false;
+	const dts =
+		opts.typescriptDeclarations === true
+			? defaultDtsPath
+			: typeof opts.typescriptDeclarations === "function"
+				? wrapDtsFn(opts.typescriptDeclarations)
+				: () => false as const;
 
 	const defaultDeserialize: DeserializeFunction =
 		opts.deserialize ?? ((data) => JSON.parse(data));
