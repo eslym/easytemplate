@@ -128,8 +128,8 @@ async function transformDot(
 	deserializers: Record<string, DeserializeFunction>,
 	defaultDeserialize: DeserializeFunction,
 	dts: (id: string) => string | false,
+	src: string,
 	id: string,
-	src: string
 ) {
 	if (!filter(id)) return null;
 	if (!extensions.some((ext) => id.endsWith(ext))) {
@@ -247,8 +247,8 @@ async function transformNested(
 	deserializers: Record<string, DeserializeFunction>,
 	defaultDeserialize: DeserializeFunction,
 	dts: (id: string) => string | false,
+	src: string,
 	id: string,
-	src: string
 ) {
 	if (!filter(id)) return null;
 	if (!extensions.some((ext) => id.endsWith(ext))) {
