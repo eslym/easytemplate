@@ -129,7 +129,7 @@ async function transformDot(
 	defaultDeserialize: DeserializeFunction,
 	dts: (id: string) => string | false,
 	src: string,
-	id: string,
+	id: string
 ) {
 	if (!filter(id)) return null;
 	if (!extensions.some((ext) => id.endsWith(ext))) {
@@ -221,19 +221,11 @@ function travelNested(
 			variables
 		);
 
-		let hashed = hashName(key, JSON.stringify, true);
+		const quoted = JSON.stringify(key);
 
-		if (key.length >= 4) {
-			variables.set(
-				hashed.name,
-				`const ${hashed.name} = ${hashed.wrapped};`
-			);
-			code.push(T.code`\t${hashed.accessor}: ${T.indent(childCode)},`);
-		} else {
-			code.push(T.code`\t${hashed.wrapped}: ${T.indent(childCode)},`);
-		}
+		code.push(T.code`\t${quoted}: ${T.indent(childCode)},`);
 
-		dts.push(T.code`\t${JSON.stringify(key)}: ${T.indent(childDts)},`);
+		dts.push(T.code`\t${quoted}: ${T.indent(childDts)},`);
 	}
 	code.push("}");
 	dts.push("}");
@@ -248,7 +240,7 @@ async function transformNested(
 	defaultDeserialize: DeserializeFunction,
 	dts: (id: string) => string | false,
 	src: string,
-	id: string,
+	id: string
 ) {
 	if (!filter(id)) return null;
 	if (!extensions.some((ext) => id.endsWith(ext))) {
