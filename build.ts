@@ -1,6 +1,11 @@
 await Bun.$`rm -rf ./dist`;
 await Bun.build({
-	entrypoints: ["lib/index.ts", "lib/vite.ts"],
+	entrypoints: [
+		"lib/index.ts",
+		"lib/compile.ts",
+		"lib/rollup.ts",
+		"lib/esbuild.ts"
+	],
 	splitting: true,
 	minify: true,
 	sourcemap: true,
@@ -10,7 +15,12 @@ await Bun.build({
 	external: ["vite"]
 });
 await Bun.build({
-	entrypoints: ["lib/index.ts", "lib/vite.ts"],
+	entrypoints: [
+		"lib/index.ts",
+		"lib/compile.ts",
+		"lib/rollup.ts",
+		"lib/esbuild.ts"
+	],
 	splitting: true,
 	minify: true,
 	sourcemap: true,

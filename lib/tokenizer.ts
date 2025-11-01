@@ -7,10 +7,22 @@ export type Token = TextToken | VariableToken | WrapperToken | NewLineToken;
 
 export type ParamsDef = Record<string, "v" | "w">;
 
-const var_regex = /^\{\{\s*([a-z][0-9a-z_]*)\s*}}/i;
-const open_regex = /^\{\{\s*#([a-z][0-9a-z_]*)\s*}}/i;
-const close_regex = /^\{\{\s*\/([a-z][0-9a-z_]*)\s*}}/i;
 const newline_regex = /^(?:\r?\n|\r)/;
+
+const syntax = {
+	default: {
+		var: /^\{\{\s*([a-z_][0-9a-z_]*)\s*}}/i,
+		open: /^\{\{\s*#([a-z_][0-9a-z_]*)\s*}}/i,
+		close: /^\{\{\s*\/([a-z_][0-9a-z_]*)\s*}}/i
+	},
+	laravel: {
+		var: /^:([a-z_][0-9a-z_]*)/i,
+		open: /^<([a-z_][0-9a-z_]*)>/i,
+		close: /^<\/([a-z_][0-9a-z_]*)>/i
+	}
+};
+
+export type SyntaxVariant = keyof typeof syntax;
 
 const types = {
 	v: "variable",
@@ -85,7 +97,16 @@ function assertParam(
 	}
 }
 
-export function tokenize(src: string): [tokens: Token[], params: ParamsDef] {
+export function tokenize(
+	src: string,
+	variant: SyntaxVariant = "default"
+): [tokens: Token[], params: ParamsDef] {
+	const {
+		var: var_regex,
+		open: open_regex,
+		close: close_regex
+	} = syntax[variant];
+
 	const root: Token[] = [];
 
 	const stack: [

@@ -1,6 +1,5 @@
+import type { PARAMS } from "./symbols";
 import type { ParamsDef, Token } from "./tokenizer";
-
-export const PARAMS = Symbol("params");
 
 export type Param = { toString(): string } | null | undefined;
 export type Wrapper =

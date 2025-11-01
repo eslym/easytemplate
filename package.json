@@ -1,8 +1,9 @@
 {
 	"name": "@eslym/easytemplate",
 	"description": "A very simple, featureless template engine",
-	"version": "1.1.4",
+	"version": "1.2.0",
 	"module": "dist/esm/index.js",
+	"types": "dist/types/index.d.ts",
 	"type": "module",
 	"files": [
 		"dist"
@@ -13,19 +14,35 @@
 			"require": "./dist/cjs/index.js",
 			"types": "./dist/types/index.d.ts"
 		},
+		"./compile": {
+			"import": "./dist/esm/compile.js",
+			"require": "./dist/cjs/compile.js",
+			"types": "./dist/types/compile.d.ts"
+		},
 		"./vite": {
-			"import": "./dist/esm/vite.js",
-			"require": "./dist/cjs/vite.js",
-			"types": "./dist/types/vite.d.ts"
+			"import": "./dist/esm/rollup.js",
+			"require": "./dist/cjs/rollup.js",
+			"types": "./dist/types/rollup.d.ts"
 		},
 		"./rollup": {
-			"import": "./dist/esm/vite.js",
-			"require": "./dist/cjs/vite.js",
-			"types": "./dist/types/vite.d.ts"
+			"import": "./dist/esm/rollup.js",
+			"require": "./dist/cjs/rollup.js",
+			"types": "./dist/types/rollup.d.ts"
+		},
+		"./esbuild": {
+			"import": "./dist/esm/esbuild.js",
+			"require": "./dist/cjs/esbuild.js",
+			"types": "./dist/types/esbuild.d.ts"
+		},
+		"./bun": {
+			"import": "./dist/esm/esbuild.js",
+			"require": "./dist/cjs/esbuild.js",
+			"types": "./dist/types/esbuild.d.ts"
 		}
 	},
 	"devDependencies": {
 		"@types/bun": "latest",
+		"esbuild": "^0.25.11",
 		"js-xxhash": "^4.0.0",
 		"prettier": "^3.6.2",
 		"vite": "^7.1.9"

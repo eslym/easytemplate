@@ -29,6 +29,7 @@ const template = "Hello, {{name}}!";
 const [tokens, params] = tokenize(template);
 const output = render(tokens, { name: "World" }); // "Hello, World!"
 ```
+
 ## Template Syntax: Variables and Wrappers
 
 ### Variables
@@ -63,7 +64,6 @@ Wrappers can be nested and combined with variables for advanced templating.
 
 ## Vite Plugin
 
-
 Integrate with Vite by importing the plugin from `@eslym/easytemplate/vite`.
 
 ### Example
@@ -73,12 +73,13 @@ Integrate with Vite by importing the plugin from `@eslym/easytemplate/vite`.
 import { easyTemplate } from "@eslym/easytemplate/vite";
 
 export default {
-	plugins: [easyTemplate({
-		extensions: [".etmpl"], // your template file extensions
-		// other options...
-	})]
+	plugins: [
+		easyTemplate({
+			extensions: [".etmpl"] // your template file extensions
+			// other options...
+		})
+	]
 };
-
 ```
 
 ### Using Other File Formats (e.g., YAML)
@@ -86,14 +87,16 @@ export default {
 You can use other file formats like YAML by providing a custom deserializer:
 
 ```typescript
-import yaml from 'js-yaml';
+import yaml from "js-yaml";
 import { easyTemplate } from "@eslym/easytemplate/vite";
 
 export default {
-	plugins: [easyTemplate({
-		extensions: { ".yaml": yaml.load }, // use js-yaml to parse YAML files
-		// other options...
-	})]
+	plugins: [
+		easyTemplate({
+			extensions: { ".yaml": yaml.load } // use js-yaml to parse YAML files
+			// other options...
+		})
+	]
 };
 ```
 
