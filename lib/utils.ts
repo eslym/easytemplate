@@ -1,6 +1,18 @@
 import { dirname, extname } from "path";
-import { mkdir, writeFile, rename, exists } from "fs/promises";
+import { mkdir, writeFile, rename, stat } from "fs/promises";
 import { xxHash32 } from "js-xxhash";
+
+export async function exists(path: string) {
+	try {
+		await stat(path);
+		return true;
+	} catch (e) {
+		if (Error.isError(e) && (e as any).code === "ENOENT") {
+			return false;
+		}
+		throw e;
+	}
+}
 
 export function defaultDtsPath(id: string) {
 	if (/\.[tj]s$/.test(id)) {

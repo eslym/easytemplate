@@ -1,7 +1,7 @@
 {
 	"name": "@eslym/easytemplate",
 	"description": "A very simple, featureless template engine",
-	"version": "1.2.0",
+	"version": "1.2.1",
 	"module": "dist/esm/index.js",
 	"types": "dist/types/index.d.ts",
 	"type": "module",
@@ -42,12 +42,12 @@
 	},
 	"devDependencies": {
 		"@types/bun": "latest",
-		"esbuild": "^0.25.11",
+		"esbuild": "^0.25.12",
 		"js-xxhash": "^4.0.0",
-		"prettier": "^3.6.2",
-		"vite": "^7.1.9"
+		"prettier": "^3.8.3",
+		"vite": "^7.3.5"
 	},
 	"peerDependencies": {
-		"typescript": "^5"
+		"typescript": "^5.9.3"
 	}
 }

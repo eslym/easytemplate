@@ -1,8 +1,8 @@
 import type { Plugin, PluginBuild } from "esbuild";
 import { name as packageName } from "../package.json";
-import { defaultDtsPath, wrapDtsFn, writeFileSafe } from "./utils";
+import { defaultDtsPath, exists, wrapDtsFn, writeFileSafe } from "./utils";
 import { compile, type CompileOptions } from "./compile";
-import { readFile, exists } from "fs/promises";
+import { readFile } from "fs/promises";
 import { resolve } from "path";
 import type { PluginBuilder } from "bun";
 import type { SyntaxVariant } from "./tokenizer";

@@ -26,6 +26,9 @@
 		"noPropertyAccessFromIndexSignature": false,
 
 		"emitDeclarationOnly": true,
+
+		"rootDir": "./lib",
+
 		"declaration": true,
 		"declarationDir": "dist/types"
 	},
